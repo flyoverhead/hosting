@@ -1,0 +1,149 @@
+---
+
+- name: detect | datacenters
+  when:
+    - vdsina_server.state | default('present') == 'present'
+  block:
+
+    - name: detect | get datacenters
+      ansible.builtin.uri:
+        url: '{{ vdsina_account.url }}/datacenter'
+        method: GET
+        status_code: 200
+        headers:
+          Content-Type: application/json
+          Authorization: '{{ vdsina_account.api_key }}'
+      register: datacenters_info
+
+    - name: detect | set datacenter_id fact
+      ansible.builtin.set_fact:
+        datacenter_id: >-
+          {{ datacenters_info.json.data |
+          selectattr('country', 'equalto', vdsina_account.country) |
+          map(attribute='id') | first }}
+
+- name: detect | servers
+  block:
+
+    - name: detect | get servers
+      ansible.builtin.uri:
+        url: '{{ vdsina_account.url }}/server'
+        method: GET
+        status_code: 200
+        headers:
+          Content-Type: application/json
+          Authorization: '{{ vdsina_account.api_key }}'
+      register: servers_info
+
+    - name: detect | set server_exists fact
+      ansible.builtin.set_fact:
+        server_exists: >-
+          {{ true if
+          servers_info.json.data | selectattr('ip.ip', 'equalto', ansible_host) | length > 0
+          else false }}
+
+    - name: detect | set server facts
+      ansible.builtin.set_fact:
+        server_id: >-
+          {{ servers_info.json.data |
+          selectattr('ip.ip', 'equalto', ansible_host) |
+          map(attribute='id') | first }}
+      when:
+        - server_exists
+
+- name: detect | server groups
+  when:
+    - vdsina_server.state | default('present') == 'present'
+  block:
+
+    - name: detect | get server groups
+      ansible.builtin.uri:
+        url: '{{ vdsina_account.url }}/server-group'
+        method: GET
+        status_code: 200
+        headers:
+          Content-Type: application/json
+          Authorization: '{{ vdsina_account.api_key }}'
+      register: server_groups_info
+
+    - name: detect | set server_group_id fact
+      ansible.builtin.set_fact:
+        server_group_id: >-
+          {{ server_groups_info.json.data |
+          selectattr('name', 'equalto', vdsina_server.group) |
+          map(attribute='id') | first }}
+
+- name: detect | server plans
+  when:
+    - vdsina_server.state | default('present') == 'present'
+  block:
+
+    - name: detect | get server plans
+      ansible.builtin.uri:
+        url: '{{ vdsina_account.url }}/server-plan/{{ server_group_id }}'
+        method: GET
+        status_code: 200
+        headers:
+          Content-Type: application/json
+          Authorization: '{{ vdsina_account.api_key }}'
+      register: server_plans_info
+
+    - name: detect | set server_plan_id fact
+      ansible.builtin.set_fact:
+        server_plan_id: >-
+          {{ server_plans_info.json.data |
+          selectattr('data.cpu.value', 'equalto', vdsina_server.cpu) |
+          map(attribute='id') | first }}
+
+- name: detect | ssh keys
+  when:
+    - vdsina_server.state | default('present') == 'present'
+  block:
+
+    - name: detect | get ssh keys
+      ansible.builtin.uri:
+        url: '{{ vdsina_account.url }}/ssh-key'
+        method: GET
+        status_code: 200
+        headers:
+          Content-Type: application/json
+          Authorization: '{{ vdsina_account.api_key }}'
+      register: ssh_keys_info
+
+    - name: detect | set ssh_key_exists fact
+      ansible.builtin.set_fact:
+        ssh_key_exists: >-
+          {{ true if
+          ssh_keys_info.json.data | selectattr('name', 'equalto', vdsina_server.ssh_key) | length > 0
+          else false }}
+
+    - name: detect | set ssh_key_id fact
+      ansible.builtin.set_fact:
+        ssh_key_id: >-
+          {{ ssh_keys_info.json.data |
+          selectattr('name', 'equalto', vdsina_server.ssh_key) |
+          map(attribute='id') | first }}
+      when:
+        - ssh_key_exists
+
+- name: detect | templates
+  when:
+    - vdsina_server.state | default('present') == 'present'
+  block:
+
+    - name: detect | templates
+      ansible.builtin.uri:
+        url: '{{ vdsina_account.url }}/template'
+        method: GET
+        status_code: 200
+        headers:
+          Content-Type: application/json
+          Authorization: '{{ vdsina_account.api_key }}'
+      register: templates_info
+
+    - name: detect | set template_id fact
+      ansible.builtin.set_fact:
+        template_id: >-
+          {{ templates_info.json.data |
+          selectattr('name', 'equalto', vdsina_server.template) |
+          map(attribute='id') | first }}

@@ -1,0 +1,15 @@
+---
+
+vdsina_account:
+  url: https://userapi.vdsina.com/v1
+  api_key: ''
+  country: nl
+
+vdsina_server:
+  cpu: 1
+  group: Standard servers
+  name: xray-nl
+  password: '' # The password must contain from 8 to 32 latin characters or numbers
+  ssh_key: id_ed25519
+  template: Debian 12
+  state: present

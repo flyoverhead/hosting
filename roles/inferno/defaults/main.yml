@@ -1,0 +1,11 @@
+---
+
+inferno_account:
+  url: https://cp.inferno.name/api_client.php?action=
+  cid: ''
+  key: ''
+
+inferno_vps:
+  ssh_key: id_ed25519
+  template: debian12
+  reinstall: false

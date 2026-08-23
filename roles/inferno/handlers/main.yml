@@ -1,0 +1,15 @@
+---
+
+- name: vps | check
+  ansible.builtin.uri:
+    url: >-
+      {{ inferno_account.url + 'getinfo' +
+      '&cid=' + inferno_account.cid | string +
+      '&key=' + inferno_account.key +
+      '&orderid=' + inferno_vps_order_id }}
+    method: GET
+    status_code: 200
+    headers:
+      Content-Type: application/json
+  register: vps_info
+  until: vps_info.json.vps_info.online | bool

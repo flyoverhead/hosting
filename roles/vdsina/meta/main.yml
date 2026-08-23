@@ -1,0 +1,9 @@
+---
+
+galaxy_info:
+  author: flyoverhead
+  description: VDSina API server configuration
+  license: GPL-3.0-only
+  min_ansible_version: '2.16'
+  galaxy_tags:
+    - vdsina
