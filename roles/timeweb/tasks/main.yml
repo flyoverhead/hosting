@@ -3,7 +3,19 @@
 - name: detect
   ansible.builtin.include_tasks:
     file: detect.yml
+    apply:
+      tags:
+        - timeweb.config
+        - timeweb.detect
+  tags:
+    - timeweb.config
+    - timeweb.detect
 
-- name: configure
+- name: config
   ansible.builtin.include_tasks:
     file: configure.yml
+    apply:
+      tags:
+        - timeweb.config
+  tags:
+    - timeweb.config

@@ -22,9 +22,18 @@ timeweb:
 ## Playbook
 
 ```yaml
-- hosts: ru
-  roles:
-      - role: timeweb
+- name: timeweb
+  hosts: timeweb
+  gather_facts: true
+
+  tasks:
+
+    - name: timeweb vps
+      ansible.builtin.include_role:
+        name: flyoverhead.hosting.timeweb
+        apply:
+          become: false
+          delegate_to: localhost
 ```
 
 ## Variables
@@ -40,10 +49,21 @@ timeweb_server:
   cpu: 1
   name: ru-server
   os_name: debian
-  os_version: '12'
-  ssh_key: id_ed25519
+  os_version: '13'
+  ssh_key: automator
   state: present
 ```
+
+## Facts set by this role
+
+| Fact | Description |
+| :--- | :--- |
+| `timeweb_preset_id` | The cheapest server preset id matching `timeweb_account.location` and `timeweb_server.cpu` |
+| `timeweb_server_exists` | Whether a server already answers on `ansible_host` |
+| `timeweb_server_id` | The id of that existing server, when `timeweb_server_exists` |
+| `timeweb_ssh_key_exists` | Whether `timeweb_server.ssh_key` is already registered with the account |
+| `timeweb_ssh_key_id` | The id of that ssh key, whether pre-existing or just created |
+| `timeweb_os_id` | The os image id matching `timeweb_server.os_name` and `timeweb_server.os_version` |
 
 ## Notes
 
