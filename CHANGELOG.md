@@ -111,3 +111,17 @@ lived as loose local roles under `roles/`.
   carry. The new README documents the four facts the role sets, that this
   provider authenticates with a `cid` + `key` pair rather than a bearer token,
   and that `reinstall: true` destroys and rebuilds the server.
+
+### Known issues
+
+- **inferno**: a first run against an account that does not already hold the
+  configured SSH key fails in `detect.yml`. `inferno_ssh_key_id` now selects
+  the account key matching `inferno_server.ssh_key` and errors if none
+  matches, while `config | add ssh keys` only uploads it afterwards. This is
+  deliberate — the previous behaviour silently took an arbitrary key and
+  provisioned the server with the wrong access. `timeweb` guards the
+  equivalent step with `timeweb_ssh_key_exists`; `inferno` has no counterpart
+  yet.
+- **inferno**: `config | add ssh keys` is unguarded and re-issues `sshkey.add`
+  on every run. Its `changed_when` reads `json.message` and will raise on any
+  response that omits that field, which is likely from the second run onward.
