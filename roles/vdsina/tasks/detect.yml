@@ -14,6 +14,7 @@
           Content-Type: application/json
           Authorization: '{{ vdsina_account.api_key }}'
       register: vdsina_datacenters_info
+      check_mode: false
 
     - name: detect | set vdsina_datacenter_id fact
       ansible.builtin.set_fact:
@@ -34,6 +35,7 @@
           Content-Type: application/json
           Authorization: '{{ vdsina_account.api_key }}'
       register: vdsina_servers_info
+      check_mode: false
 
     - name: detect | set vdsina_server_exists fact
       ansible.builtin.set_fact:
@@ -65,6 +67,7 @@
           Content-Type: application/json
           Authorization: '{{ vdsina_account.api_key }}'
       register: vdsina_server_groups_info
+      check_mode: false
 
     - name: detect | set vdsina_server_group_id fact
       ansible.builtin.set_fact:
@@ -87,6 +90,7 @@
           Content-Type: application/json
           Authorization: '{{ vdsina_account.api_key }}'
       register: vdsina_server_plans_info
+      check_mode: false
 
     - name: detect | set vdsina_server_plan_id fact
       ansible.builtin.set_fact:
@@ -109,6 +113,7 @@
           Content-Type: application/json
           Authorization: '{{ vdsina_account.api_key }}'
       register: vdsina_ssh_keys_info
+      check_mode: false
 
     - name: detect | set vdsina_ssh_key_exists fact
       ansible.builtin.set_fact:
@@ -140,6 +145,7 @@
           Content-Type: application/json
           Authorization: '{{ vdsina_account.api_key }}'
       register: vdsina_templates_info
+      check_mode: false
 
     - name: detect | set vdsina_template_id fact
       ansible.builtin.set_fact:

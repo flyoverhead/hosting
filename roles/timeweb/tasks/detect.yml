@@ -14,6 +14,7 @@
           Content-Type: application/json
           Authorization: Bearer {{ timeweb_account.api_key }}
       register: timeweb_presets_info
+      check_mode: false
 
     - name: detect | set timeweb_preset_id fact
       ansible.builtin.set_fact:
@@ -36,6 +37,7 @@
           Content-Type: application/json
           Authorization: Bearer {{ timeweb_account.api_key }}
       register: timeweb_servers_info
+      check_mode: false
 
     - name: detect | set timeweb_server_exists fact
       ansible.builtin.set_fact:
@@ -69,6 +71,7 @@
           Content-Type: application/json
           Authorization: Bearer {{ timeweb_account.api_key }}
       register: timeweb_ssh_keys_info
+      check_mode: false
 
     - name: detect | set timeweb_ssh_key_exists fact
       ansible.builtin.set_fact:
@@ -100,6 +103,7 @@
           Content-Type: application/json
           Authorization: Bearer {{ timeweb_account.api_key }}
       register: timeweb_os_info
+      check_mode: false
 
     - name: detect | set timeweb_os_id fact
       ansible.builtin.set_fact:
