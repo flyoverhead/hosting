@@ -2,7 +2,7 @@
 
 All notable changes to `flyoverhead.hosting`.
 
-## Unreleased
+## 1.0.1
 
 ### Fixed
 
