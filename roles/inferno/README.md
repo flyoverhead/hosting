@@ -76,6 +76,20 @@ inferno_server:
   key and derives its id. Renaming the key in the provider's UI, or uploading
   it out of band under a different name, will break the lookup
 
+## Check mode
+
+Every request in `detect.yml` is a read-only GET and carries `check_mode:
+false`, so a check run performs them for real: `ansible.builtin.uri` declares no
+check mode support at all, and a skipped result holds no `json` for the
+`set_fact` after it to read. A check run therefore needs working API credentials
+and costs one call per read. It changes nothing on the provider side.
+
+Nothing that changes the account runs. Uploading the ssh key and `reinstall` are
+both skipped, and when the key does not exist yet the block that would upload it
+is skipped whole -- there would be no id to read back out of `sshkey.list` --
+with `inferno_ssh_key_id` set to `check-mode-placeholder` so the reinstall task
+below it can still be templated.
+
 ## Tags
 
 | Tag | Purpose |

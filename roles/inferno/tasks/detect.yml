@@ -9,6 +9,7 @@
     headers:
       Content-Type: application/json
   register: inferno_templates_info
+  check_mode: false
 
 - name: detect | set inferno_template fact
   ansible.builtin.set_fact:
@@ -27,6 +28,7 @@
     headers:
       Content-Type: application/json
   register: inferno_orders_info
+  check_mode: false
 
 - name: detect | get vps info
   run_once: true
@@ -40,6 +42,7 @@
     headers:
       Content-Type: application/json
   register: inferno_vps_info
+  check_mode: false
   loop: '{{ inferno_orders_info.json.orders.keys() }}'
 
 - name: detect | set inferno_order_id fact
@@ -60,6 +63,7 @@
     headers:
       Content-Type: application/json
   register: inferno_ssh_keys_info
+  check_mode: false
 
 - name: detect | set inferno_ssh_key_exists fact
   ansible.builtin.set_fact:

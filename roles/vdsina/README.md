@@ -76,6 +76,21 @@ vdsina_server:
   `vdsina_server`. If the create-server body ever gains a password field, add
   the variable back alongside it and set `no_log` on the tasks that touch it.
 
+## Check mode
+
+Every request in `detect.yml` is a read-only GET and carries `check_mode:
+false`, so a check run performs them for real: `ansible.builtin.uri` declares no
+check mode support at all, and a skipped result holds no `json` for the
+`set_fact` after it to read. A check run therefore needs a working API key and
+costs one call per read. It changes nothing on the provider side.
+
+Nothing that changes the account runs, and a check run is correspondingly quiet
+about it: creating the ssh key, ordering a server and dropping its backup
+schedule are skipped as whole blocks, because each reads its result back out of
+the creation response, and deleting a server (`state: absent`) is skipped as
+well. What a check run does report is the `ansible_host` line it would write
+into `host_vars`.
+
 ## Tags
 
 | Tag | Purpose |

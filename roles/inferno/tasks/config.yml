@@ -3,6 +3,7 @@
 - name: config | ssh
   when:
     - not inferno_ssh_key_exists
+    - not ansible_check_mode
   block:
 
     # `name` is what detect.yml's selectattr matches on. Without it the
@@ -49,6 +50,13 @@
           {{ inferno_ssh_keys_info.json.list |
           selectattr('name', 'equalto', inferno_server.ssh_key) |
           map(attribute='id') | first }}
+
+- name: config | set placeholder inferno_ssh_key_id fact
+  ansible.builtin.set_fact:
+    inferno_ssh_key_id: check-mode-placeholder
+  when:
+    - not inferno_ssh_key_exists
+    - ansible_check_mode
 
 - name: config | reinstall vps
   ansible.builtin.uri:

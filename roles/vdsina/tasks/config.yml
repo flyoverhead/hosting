@@ -4,6 +4,7 @@
   when:
     - vdsina_server.state | default('present') == 'present'
     - not vdsina_ssh_key_exists
+    - not ansible_check_mode
   block:
 
     - name: config | create ssh key
@@ -36,6 +37,7 @@
       when:
         - not vdsina_server_exists
         - vdsina_server.state | default('present') == 'present'
+        - not ansible_check_mode
       block:
 
         - name: config | create server

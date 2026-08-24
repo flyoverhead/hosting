@@ -4,6 +4,7 @@
   when:
     - timeweb_server.state | default('present') == 'present'
     - not timeweb_ssh_key_exists
+    - not ansible_check_mode
   block:
 
     - name: config | create ssh key
@@ -37,6 +38,7 @@
       when:
         - not timeweb_server_exists
         - timeweb_server.state | default('present') == 'present'
+        - not ansible_check_mode
       block:
 
         - name: config | create server

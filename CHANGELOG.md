@@ -2,6 +2,32 @@
 
 All notable changes to `flyoverhead.hosting`.
 
+## Unreleased
+
+### Fixed
+
+- **Check mode**: `ansible-playbook --check --diff` now completes for all three
+  roles. Every `detect.yml` read provider state with `ansible.builtin.uri`,
+  which declares no check mode support and is therefore skipped in a check run,
+  and the `set_fact` immediately after it dereferenced `.json` -- so the play
+  aborted on the first task of every role. All fourteen read-only GETs now carry
+  `check_mode: false`.
+
+### Changed
+
+- **inferno**, **timeweb**, **vdsina**: the blocks that change the account --
+  uploading an ssh key, ordering a server, dropping its backup schedule,
+  deleting a server -- are now skipped as whole blocks in a check run, since
+  each reads its own result back out of the creation response. `inferno`
+  additionally sets `inferno_ssh_key_id` to `check-mode-placeholder`, because
+  `config | reinstall vps` has its `url` templated before the `uri` action gets
+  to skip itself.
+- A check run now makes real read-only API calls, so it needs working
+  credentials and costs one call per read. It changes nothing on the provider
+  side.
+- Every role README gained a `## Check mode` section stating what a check run
+  covers and what it cannot.
+
 ## 1.0.0
 
 Initial release. The three hosting-provider API roles — `timeweb`, `vdsina`
