@@ -55,7 +55,8 @@ inferno_server:
 | :--- | :--- |
 | `inferno_template` | The os template id matching `inferno_server.template` |
 | `inferno_order_id` | The order id of the server answering on `ansible_host` |
-| `inferno_ssh_key_id` | The id of the account ssh key named `inferno_server.ssh_key` |
+| `inferno_ssh_key_exists` | Whether the account already holds a key named `inferno_server.ssh_key` |
+| `inferno_ssh_key_id` | The id of that key — set from `detect` when it exists, from the upload when it did not |
 | `inferno_reinstall` | `inferno_server.reinstall` as the integer the API's `run` parameter expects |
 
 ## Notes
@@ -66,16 +67,14 @@ inferno_server:
 - `reinstall: true` **destroys and rebuilds the server**, so the role is not
   idempotent in the ordinary sense — the reinstall is skipped entirely while
   `reinstall` is `false`, and performed unconditionally when it is `true`
-- `inferno_server.ssh_key` must match the key's name **in the inferno.name
-  account** as well as the local `~/.ssh/<name>.pub` filename. This role's own
-  `config | add ssh keys` upload does not set that name — it sends only `cid`
-  and `sshkey`, so inferno.name names the key itself (most plausibly from the
-  public-key comment) — so uploading it once out of band is not by itself
-  enough: it must be uploaded (or renamed) under exactly `inferno_server.ssh_key`,
-  or `detect.yml`'s `inferno_ssh_key_id` lookup will find nothing and fail.
-  `timeweb` and `vdsina` both set `name` on upload; `inferno` is the outlier.
-  The real repair is adding `name` to that upload body, which is deliberately
-  out of scope here
+- `inferno_server.ssh_key` names the key in two places at once: the local
+  public key is read from `~/.ssh/<name>.pub`, and the same string is the
+  key's `name` in the inferno.name account. The role keeps the two in step —
+  `config | add ssh keys` sends `name` explicitly on upload, and `detect.yml`
+  selects on it — so a fresh account bootstraps without manual steps: `detect`
+  finds nothing, sets `inferno_ssh_key_exists: false`, and `config` uploads the
+  key and derives its id. Renaming the key in the provider's UI, or uploading
+  it out of band under a different name, will break the lookup
 
 ## Tags
 

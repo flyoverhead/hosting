@@ -31,6 +31,25 @@ lived as loose local roles under `roles/`.
   for a VPS that has just been destroyed and rebuilt. Now 30 attempts at 10s,
   giving it five minutes to come back.
 
+- **inferno**: `config | add ssh keys` now sends `name` in its upload body, and
+  the whole ssh block is guarded with `when: not inferno_ssh_key_exists`.
+  Previously the upload omitted `name`, so the provider named the key itself
+  and `detect.yml`'s `selectattr('name', 'equalto', inferno_server.ssh_key)`
+  could never match the key the role had just uploaded — the role was
+  unbootstrappable against an account that did not already hold the key under
+  exactly that name. `detect.yml` now sets `inferno_ssh_key_exists` and only
+  derives `inferno_ssh_key_id` when the key is present, mirroring `timeweb`;
+  `config.yml` re-reads `sshkey.list` after uploading and derives the id from
+  there rather than guessing at the undocumented `sshkey.add` response shape.
+  The guard also stops the task re-issuing `sshkey.add` on every run, and its
+  `changed_when` now defaults the missing-`message` case instead of raising.
+- **vdsina**: removed `vdsina_server.password`. It was declared and never sent
+  — `config | create server` posts only `datacenter`, `name`, `server-plan`,
+  `ssh-key` and `template` — so a caller wiring a vaulted secret into it gained
+  nothing and put the cleartext into anything that renders `vdsina_server`
+  (`ansible-inventory --list`, the fact cache, task output; no task in the role
+  sets `no_log`). Servers are provisioned key-only.
+
 ### Changed
 
 - **timeweb**: internal registers and set_facts gained a `timeweb_` prefix, so
@@ -119,34 +138,6 @@ lived as loose local roles under `roles/`.
 
 ### Known issues
 
-- **inferno**: the role is unbootstrappable against an inferno.name account
-  that does not already hold the configured SSH key, uploaded under **exactly**
-  the name `inferno_server.ssh_key`. `tasks/main.yml` deliberately tags
-  `detect` with both `inferno.detect` and `inferno.config`, so any tag
-  selection that reaches `config` runs `detect` first, and `detect.yml`'s
-  `inferno_ssh_key_id` selects with
-  `selectattr('name', 'equalto', inferno_server.ssh_key)` and now errors when
-  nothing matches — before `config | add ssh keys` ever gets a chance to
-  upload it. There is no tag combination that reaches `config | add ssh keys`
-  on a fresh account: the key must already exist in the inferno.name account,
-  under that exact name, before the role can succeed at all. Uploading the
-  key out of band once is not by itself sufficient: `config | add ssh keys`
-  sends only `cid` and `sshkey` in its own upload — no `name` — so the
-  provider names the key itself (most plausibly from the public-key comment),
-  and nothing guarantees that name agrees with `inferno_server.ssh_key`.
-  `timeweb` and `vdsina` both set `name` explicitly on upload; `inferno` is
-  the outlier, and the real repair is adding `name` to this role's own
-  upload body, which is deliberately out of scope here. This is a deliberate
-  consequence of no longer silently taking an arbitrary key and provisioning
-  the server with the wrong access, but it means bootstrapping a new account
-  is a manual, out-of-band step that must be done under the right name.
-  `timeweb` guards the equivalent step with `timeweb_ssh_key_exists`;
-  `inferno` has no counterpart yet.
-- **inferno**: `config | add ssh keys` is unguarded and re-issues `sshkey.add`
-  on every run. Its `changed_when` reads `json.message` and will raise on any
-  response that omits that field, which is likely from the second run onward.
-  It also sends a JSON `body` with `method: GET`, which is unusual enough to
-  be worth confirming against the provider's API before relying on it.
 - **inferno**: `tasks/detect.yml`'s os-template selection,
   `select('match', inferno_server.template) | first`, is unanchored — Jinja's
   `match` test matches at the start of the string but not the end, so a
