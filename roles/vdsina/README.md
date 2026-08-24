@@ -47,7 +47,6 @@ vdsina_server:
   cpu: 1
   group: Standard servers
   name: nl-server
-  password: <root_password> # The password must contain from 8 to 32 latin characters or numbers
   ssh_key: id_ed25519
   template: Debian 12
   state: present
@@ -68,11 +67,14 @@ vdsina_server:
 
 ## Notes
 
-- `vdsina_server.password` is accepted but currently unused: `config | create
-  server` in `tasks/config.yml` sends only `datacenter`, `name`,
-  `server-plan`, `ssh-key` and `template` in the create-server body, never
-  `password`. Servers are provisioned key-only; setting `password` has no
-  effect until the create-server body is updated to include it.
+- Servers are provisioned **key-only**. `config | create server` sends only
+  `datacenter`, `name`, `server-plan`, `ssh-key` and `template`, so there is no
+  root-password knob. `vdsina_server.password` was declared in an earlier
+  version and never sent; it has been removed rather than left as a variable
+  that silently does nothing, because a caller wiring a vaulted secret into it
+  gained no effect and put the cleartext into anything rendering
+  `vdsina_server`. If the create-server body ever gains a password field, add
+  the variable back alongside it and set `no_log` on the tasks that touch it.
 
 ## Tags
 

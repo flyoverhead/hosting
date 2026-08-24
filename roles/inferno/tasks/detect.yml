@@ -61,12 +61,24 @@
       Content-Type: application/json
   register: inferno_ssh_keys_info
 
+- name: detect | set inferno_ssh_key_exists fact
+  ansible.builtin.set_fact:
+    inferno_ssh_key_exists: >-
+      {{ true if
+      inferno_ssh_keys_info.json.list | selectattr('name', 'equalto', inferno_server.ssh_key) | length > 0
+      else false }}
+
+# Guarded because `first` on an empty selection raises, and on a fresh account
+# the key does not exist until `config | add ssh keys` uploads it. config.yml
+# sets this same fact from the upload response in that case.
 - name: detect | set inferno_ssh_key_id fact
   ansible.builtin.set_fact:
     inferno_ssh_key_id: >-
       {{ inferno_ssh_keys_info.json.list |
       selectattr('name', 'equalto', inferno_server.ssh_key) |
       map(attribute='id') | first }}
+  when:
+    - inferno_ssh_key_exists
 
 - name: detect | set inferno_reinstall fact
   ansible.builtin.set_fact:

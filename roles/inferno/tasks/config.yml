@@ -1,23 +1,54 @@
 ---
 
-- name: config | add ssh keys
-  ansible.builtin.uri:
-    url: >-
-      {{ inferno_account.url + 'sshkey.add' }}
-    method: GET
-    status_code: 200
-    headers:
-      Content-Type: application/json
-      X-Key: '{{ inferno_account.key }}'
-    body:
-      cid: '{{ inferno_account.cid | string }}'
-      sshkey: >-
-        {{ lookup('file',
-        lookup('env', 'HOME') + '/.ssh/' +
-        inferno_server.ssh_key + '.pub') }}
-    body_format: json
-  register: inferno_ssh_key_result
-  changed_when: "'added' in inferno_ssh_key_result.json.message"
+- name: config | ssh
+  when:
+    - not inferno_ssh_key_exists
+  block:
+
+    # `name` is what detect.yml's selectattr matches on. Without it the
+    # provider names the key itself -- from the public-key comment -- and the
+    # role could never find the key it had just uploaded.
+    - name: config | add ssh keys
+      ansible.builtin.uri:
+        url: >-
+          {{ inferno_account.url + 'sshkey.add' }}
+        method: GET
+        status_code: 200
+        headers:
+          Content-Type: application/json
+          X-Key: '{{ inferno_account.key }}'
+        body:
+          cid: '{{ inferno_account.cid | string }}'
+          name: '{{ inferno_server.ssh_key }}'
+          sshkey: >-
+            {{ lookup('file',
+            lookup('env', 'HOME') + '/.ssh/' +
+            inferno_server.ssh_key + '.pub') }}
+        body_format: json
+      register: inferno_ssh_key_result
+      changed_when: "'added' in (inferno_ssh_key_result.json.message | default(''))"
+
+    # sshkey.add's response shape is undocumented, so re-read the list rather
+    # than guess at an id field in it. sshkey.list is the same endpoint
+    # detect.yml already relies on.
+    - name: config | re-read ssh keys
+      ansible.builtin.uri:
+        url: >-
+          {{ inferno_account.url + 'sshkey.list' +
+          '&cid=' + inferno_account.cid | string +
+          '&key=' + inferno_account.key }}
+        method: GET
+        status_code: 200
+        headers:
+          Content-Type: application/json
+      register: inferno_ssh_keys_info
+
+    - name: config | set inferno_ssh_key_id fact
+      ansible.builtin.set_fact:
+        inferno_ssh_key_id: >-
+          {{ inferno_ssh_keys_info.json.list |
+          selectattr('name', 'equalto', inferno_server.ssh_key) |
+          map(attribute='id') | first }}
 
 - name: config | reinstall vps
   ansible.builtin.uri:
