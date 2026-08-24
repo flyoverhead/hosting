@@ -13,12 +13,12 @@
         headers:
           Content-Type: application/json
           Authorization: '{{ vdsina_account.api_key }}'
-      register: datacenters_info
+      register: vdsina_datacenters_info
 
-    - name: detect | set datacenter_id fact
+    - name: detect | set vdsina_datacenter_id fact
       ansible.builtin.set_fact:
-        datacenter_id: >-
-          {{ datacenters_info.json.data |
+        vdsina_datacenter_id: >-
+          {{ vdsina_datacenters_info.json.data |
           selectattr('country', 'equalto', vdsina_account.country) |
           map(attribute='id') | first }}
 
@@ -33,23 +33,23 @@
         headers:
           Content-Type: application/json
           Authorization: '{{ vdsina_account.api_key }}'
-      register: servers_info
+      register: vdsina_servers_info
 
-    - name: detect | set server_exists fact
+    - name: detect | set vdsina_server_exists fact
       ansible.builtin.set_fact:
-        server_exists: >-
+        vdsina_server_exists: >-
           {{ true if
-          servers_info.json.data | selectattr('ip.ip', 'equalto', ansible_host) | length > 0
+          vdsina_servers_info.json.data | selectattr('ip.ip', 'equalto', ansible_host) | length > 0
           else false }}
 
     - name: detect | set server facts
       ansible.builtin.set_fact:
-        server_id: >-
-          {{ servers_info.json.data |
+        vdsina_server_id: >-
+          {{ vdsina_servers_info.json.data |
           selectattr('ip.ip', 'equalto', ansible_host) |
           map(attribute='id') | first }}
       when:
-        - server_exists
+        - vdsina_server_exists
 
 - name: detect | server groups
   when:
@@ -64,12 +64,12 @@
         headers:
           Content-Type: application/json
           Authorization: '{{ vdsina_account.api_key }}'
-      register: server_groups_info
+      register: vdsina_server_groups_info
 
-    - name: detect | set server_group_id fact
+    - name: detect | set vdsina_server_group_id fact
       ansible.builtin.set_fact:
-        server_group_id: >-
-          {{ server_groups_info.json.data |
+        vdsina_server_group_id: >-
+          {{ vdsina_server_groups_info.json.data |
           selectattr('name', 'equalto', vdsina_server.group) |
           map(attribute='id') | first }}
 
@@ -80,18 +80,18 @@
 
     - name: detect | get server plans
       ansible.builtin.uri:
-        url: '{{ vdsina_account.url }}/server-plan/{{ server_group_id }}'
+        url: '{{ vdsina_account.url }}/server-plan/{{ vdsina_server_group_id }}'
         method: GET
         status_code: 200
         headers:
           Content-Type: application/json
           Authorization: '{{ vdsina_account.api_key }}'
-      register: server_plans_info
+      register: vdsina_server_plans_info
 
-    - name: detect | set server_plan_id fact
+    - name: detect | set vdsina_server_plan_id fact
       ansible.builtin.set_fact:
-        server_plan_id: >-
-          {{ server_plans_info.json.data |
+        vdsina_server_plan_id: >-
+          {{ vdsina_server_plans_info.json.data |
           selectattr('data.cpu.value', 'equalto', vdsina_server.cpu) |
           map(attribute='id') | first }}
 
@@ -108,23 +108,23 @@
         headers:
           Content-Type: application/json
           Authorization: '{{ vdsina_account.api_key }}'
-      register: ssh_keys_info
+      register: vdsina_ssh_keys_info
 
-    - name: detect | set ssh_key_exists fact
+    - name: detect | set vdsina_ssh_key_exists fact
       ansible.builtin.set_fact:
-        ssh_key_exists: >-
+        vdsina_ssh_key_exists: >-
           {{ true if
-          ssh_keys_info.json.data | selectattr('name', 'equalto', vdsina_server.ssh_key) | length > 0
+          vdsina_ssh_keys_info.json.data | selectattr('name', 'equalto', vdsina_server.ssh_key) | length > 0
           else false }}
 
-    - name: detect | set ssh_key_id fact
+    - name: detect | set vdsina_ssh_key_id fact
       ansible.builtin.set_fact:
-        ssh_key_id: >-
-          {{ ssh_keys_info.json.data |
+        vdsina_ssh_key_id: >-
+          {{ vdsina_ssh_keys_info.json.data |
           selectattr('name', 'equalto', vdsina_server.ssh_key) |
           map(attribute='id') | first }}
       when:
-        - ssh_key_exists
+        - vdsina_ssh_key_exists
 
 - name: detect | templates
   when:
@@ -139,11 +139,11 @@
         headers:
           Content-Type: application/json
           Authorization: '{{ vdsina_account.api_key }}'
-      register: templates_info
+      register: vdsina_templates_info
 
-    - name: detect | set template_id fact
+    - name: detect | set vdsina_template_id fact
       ansible.builtin.set_fact:
-        template_id: >-
-          {{ templates_info.json.data |
+        vdsina_template_id: >-
+          {{ vdsina_templates_info.json.data |
           selectattr('name', 'equalto', vdsina_server.template) |
           map(attribute='id') | first }}

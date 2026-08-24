@@ -3,7 +3,19 @@
 - name: detect
   ansible.builtin.include_tasks:
     file: detect.yml
+    apply:
+      tags:
+        - vdsina.config
+        - vdsina.detect
+  tags:
+    - vdsina.config
+    - vdsina.detect
 
-- name: configure
+- name: config
   ansible.builtin.include_tasks:
     file: configure.yml
+    apply:
+      tags:
+        - vdsina.config
+  tags:
+    - vdsina.config
