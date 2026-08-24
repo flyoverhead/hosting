@@ -1,48 +1,71 @@
-# `vdsina`
+# `inferno`
 
-`VDSina` hosting provider configuration
+`inferno.name` hosting provider configuration
 
 ## Role variables
 
 | Variable | Description | Example |
 | :--- | :--- | :--- |
-| `vdsina_account` | VDSina account configuration | Example in [defaults](defaults/main.yml) |
-| `vdsina_server` | VDS/VPS server configuration | Example in [defaults](defaults/main.yml) |
+| `inferno_account` | inferno.name account configuration | Example in [defaults](defaults/main.yml) |
+| `inferno_server` | VDS/VPS server configuration | Example in [defaults](defaults/main.yml) |
 
 ## Inventory
 
 ```yaml
-vdsina:
+inferno:
   hosts:
-    nl:
+    ru:
 ```
 
 ## Playbook
 
 ```yaml
-- hosts: nl
-  roles:
-      - role: vdsina
+- name: inferno
+  hosts: inferno
+  gather_facts: true
+
+  tasks:
+
+    - name: inferno vps
+      ansible.builtin.include_role:
+        name: flyoverhead.hosting.inferno
+        apply:
+          become: false
+          delegate_to: localhost
 ```
 
 ## Variables
 
 ```yaml
 
-vdsina_account:
-  url: https://userapi.vdsina.com/v1
-  api_key: <account_api_key>
-  country: nl
+inferno_account:
+  url: https://cp.inferno.name/api_client.php?action=
+  cid: '' # account client id
+  key: '' # account api key
 
-vdsina_server:
-  cpu: 1
-  group: Standard servers
-  name: nl-server
-  password: <root_password> # The password must contain from 8 to 32 latin characters or numbers
+inferno_server:
   ssh_key: id_ed25519
-  template: Debian 12
-  state: present
+  template: debian12
+  reinstall: false
 ```
+
+## Facts set by this role
+
+| Fact | Description |
+| :--- | :--- |
+| `inferno_template` | The os template id matching `inferno_server.template` |
+| `inferno_order_id` | The order id of the server answering on `ansible_host` |
+| `inferno_ssh_key_id` | The id of the account ssh key named `inferno_server.ssh_key` |
+| `inferno_reinstall` | `inferno_server.reinstall` as the integer the API's `run` parameter expects |
+
+## Notes
+
+- This provider's API authenticates with a `cid` + `key` pair rather than the
+  single bearer token `timeweb` and `vdsina` use, which is why
+  `inferno_account` carries an extra field
+- `reinstall: true` **destroys and rebuilds the server**, so the role is not
+  idempotent in the ordinary sense — the reinstall is skipped entirely while
+  `reinstall` is `false`, and performed unconditionally when it is `true`
 
 ## License
 

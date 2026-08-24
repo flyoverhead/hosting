@@ -8,13 +8,13 @@
     status_code: 200
     headers:
       Content-Type: application/json
-  register: templates_info
+  register: inferno_templates_info
 
 - name: detect | set inferno_template fact
   ansible.builtin.set_fact:
     inferno_template: >-
-      {{ templates_info.json.ostpls | list |
-      select('match', inferno_vps.template) | first }}
+      {{ inferno_templates_info.json.ostpls | list |
+      select('match', inferno_server.template) | first }}
 
 - name: detect | get orders info
   ansible.builtin.uri:
@@ -26,7 +26,7 @@
     status_code: 200
     headers:
       Content-Type: application/json
-  register: orders_info
+  register: inferno_orders_info
 
 - name: detect | get vps info
   run_once: true
@@ -39,13 +39,13 @@
     status_code: 200
     headers:
       Content-Type: application/json
-  register: vps_info
-  loop: '{{ orders_info.json.orders.keys() }}'
+  register: inferno_vps_info
+  loop: '{{ inferno_orders_info.json.orders.keys() }}'
 
-- name: detect | set inferno_vps_order_id fact
+- name: detect | set inferno_order_id fact
   ansible.builtin.set_fact:
-    inferno_vps_order_id: >-
-      {{ vps_info.results | map(attribute='json') |
+    inferno_order_id: >-
+      {{ inferno_vps_info.results | map(attribute='json') |
       selectattr('vps_info.ip', 'equalto', ansible_host) |
       map(attribute='orderid') | first }}
 
@@ -59,29 +59,15 @@
     status_code: 200
     headers:
       Content-Type: application/json
-  register: ssh_keys_info
+  register: inferno_ssh_keys_info
 
-- name: detect | set inferno_ssh_key fact
+- name: detect | set inferno_ssh_key_id fact
   ansible.builtin.set_fact:
     inferno_ssh_key_id: >-
-      {{ ssh_keys_info.json.list |
-      map(attribute="id") | first }}
+      {{ inferno_ssh_keys_info.json.list |
+      selectattr('name', 'equalto', inferno_server.ssh_key) |
+      map(attribute='id') | first }}
 
-- name: set inferno_vps_reinstall fact
+- name: detect | set inferno_reinstall fact
   ansible.builtin.set_fact:
-    inferno_vps_reinstall: '{{ inferno_vps.reinstall | int }}'
-
-- name: inferno | wait for vps
-  ansible.builtin.uri:
-    url: >-
-      {{ inferno_account.url + 'getinfo' +
-      '&cid=' + inferno_account.cid | string +
-      '&key=' + inferno_account.key +
-      '&orderid=' + vps_info.results | map(attribute='json') |
-      selectattr('vps_info.ip', 'equalto', ansible_host) |
-      map(attribute='orderid') | string }}
-    method: GET
-    status_code: 200
-    headers:
-      Content-Type: application/json
-  register: vps_info
+    inferno_reinstall: '{{ inferno_server.reinstall | int }}'

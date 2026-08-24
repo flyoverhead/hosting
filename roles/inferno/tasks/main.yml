@@ -5,15 +5,20 @@
     file: detect.yml
     apply:
       tags:
-        - inferno
+        - inferno.config
+        - inferno.detect
   tags:
-    - inferno
+    - inferno.config
+    - inferno.detect
 
-- name: configure
+- name: config
   ansible.builtin.include_tasks:
     file: configure.yml
     apply:
       tags:
-        - inferno
+        - inferno.config
   tags:
-    - inferno
+    - inferno.config
+
+- name: handlers
+  ansible.builtin.meta: flush_handlers

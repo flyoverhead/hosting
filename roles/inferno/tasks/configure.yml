@@ -1,6 +1,6 @@
 ---
 
-- name: detect | add ssh keys
+- name: config | add ssh keys
   ansible.builtin.uri:
     url: >-
       {{ inferno_account.url + 'sshkey.add' }}
@@ -14,10 +14,10 @@
       sshkey: >-
         {{ lookup('file',
         lookup('env', 'HOME') + '/.ssh/' +
-        inferno_vps.ssh_key + '.pub') }}
+        inferno_server.ssh_key + '.pub') }}
     body_format: json
-  register: ssh_key_result
-  changed_when: "'added' in ssh_key_result.json.message"
+  register: inferno_ssh_key_result
+  changed_when: "'added' in inferno_ssh_key_result.json.message"
 
 - name: config | reinstall vps
   ansible.builtin.uri:
@@ -25,17 +25,17 @@
       {{ inferno_account.url + 'reinstall' +
       '&cid=' + inferno_account.cid | string +
       '&key=' + inferno_account.key +
-      '&orderid=' + inferno_vps_order_id +
+      '&orderid=' + inferno_order_id +
       '&ostlp=' + inferno_template +
       '&sshkey_ids=' + inferno_ssh_key_id +
-      '&run=' + inferno_vps_reinstall | string }}
+      '&run=' + inferno_reinstall | string }}
     method: GET
     status_code: 200
     headers:
       Content-Type: application/json
-  register: server_reinstall
-  changed_when: server_reinstall.json.result == 'success'
+  register: inferno_reinstall_result
+  changed_when: inferno_reinstall_result.json.result == 'success'
   when:
-    - inferno_vps_reinstall | bool
+    - inferno_reinstall | bool
   notify:
     - vps | check

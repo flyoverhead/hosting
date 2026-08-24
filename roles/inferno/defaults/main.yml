@@ -5,7 +5,7 @@ inferno_account:
   cid: ''
   key: ''
 
-inferno_vps:
+inferno_server:
   ssh_key: id_ed25519
   template: debian12
   reinstall: false
