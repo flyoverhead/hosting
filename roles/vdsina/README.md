@@ -1,4 +1,4 @@
-# `vdsina`
+# `flyoverhead.hosting.vdsina`
 
 `VDSina` hosting provider configuration
 
@@ -65,6 +65,41 @@ vdsina_server:
 | `vdsina_ssh_key_exists` | Whether `vdsina_server.ssh_key` is already registered with the account |
 | `vdsina_ssh_key_id` | The id of that ssh key, whether pre-existing or just created |
 | `vdsina_template_id` | The template id matching `vdsina_server.template` |
+
+## Notes
+
+- `vdsina_server.password` is accepted but currently unused: `config | create
+  server` in `tasks/config.yml` sends only `datacenter`, `name`,
+  `server-plan`, `ssh-key` and `template` in the create-server body, never
+  `password`. Servers are provisioned key-only; setting `password` has no
+  effect until the create-server body is updated to include it.
+
+## Tags
+
+| Tag | Purpose |
+| :--- | :--- |
+| `vdsina.detect` | Detect the datacenter, existing server, group/plan, ssh key and template ids `config` needs |
+| `vdsina.config` | Create/update the server and ssh key, save `ansible_host`; also carried by `detect`'s task so a config-only run still has current facts |
+
+This role is invoked with a *dynamic* `include_role` (required, because it
+needs `delegate_to: localhost`). Ansible tag-filters a play's tasks when the
+iterator initialises, so if the calling `include_role` task is not itself
+tagged with the inner tag, `--tags vdsina.config` filters out the
+`include_role` task itself and the role is never included at all — the inner
+tags never get evaluated. The caller must carry the role's tags on the
+`include_role` task itself, e.g.:
+
+```yaml
+- name: vdsina vps
+  ansible.builtin.include_role:
+    name: flyoverhead.hosting.vdsina
+    apply:
+      become: false
+      delegate_to: localhost
+  tags: [vdsina, vdsina.detect, vdsina.config]
+```
+
+or use the flat `vdsina` role tag instead.
 
 ## License
 

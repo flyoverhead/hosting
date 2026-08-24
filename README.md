@@ -21,10 +21,6 @@ job, once the server exists and is reachable over SSH.
 
 - `ansible-core >=2.16`
 
-- Collections: `ansible.posix >=1.5.4`, `community.general >=8.0.0`
-
-- `jmespath` on the controller
-
 ### Installation
 
 Installing the collection dependencies:
@@ -50,6 +46,10 @@ Full documentation and usage examples of role `<role>` can be found in
 All three roles take the same two variables: `<provider>_account` (the API
 endpoint plus credentials) and `<provider>_server` (the desired server —
 size, image, SSH key, and whether it should be `present` or `absent`).
+
+`inferno` does not fit that second half: `inferno_server` has no size and no
+`state` — it has `reinstall` instead — and the role has no delete path at
+all, only detect/create/reinstall.
 
 Because the role talks to the provider's API rather than to the host it
 provisions, it is run against `localhost`, not against the target itself.

@@ -13,7 +13,7 @@
 
 - name: config
   ansible.builtin.include_tasks:
-    file: configure.yml
+    file: config.yml
     apply:
       tags:
         - vdsina.config

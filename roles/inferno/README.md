@@ -1,4 +1,4 @@
-# `inferno`
+# `flyoverhead.hosting.inferno`
 
 `inferno.name` hosting provider configuration
 
@@ -66,6 +66,43 @@ inferno_server:
 - `reinstall: true` **destroys and rebuilds the server**, so the role is not
   idempotent in the ordinary sense — the reinstall is skipped entirely while
   `reinstall` is `false`, and performed unconditionally when it is `true`
+- `inferno_server.ssh_key` must match the key's name **in the inferno.name
+  account** as well as the local `~/.ssh/<name>.pub` filename. This role's own
+  `config | add ssh keys` upload does not set that name — it sends only `cid`
+  and `sshkey`, so inferno.name names the key itself (most plausibly from the
+  public-key comment) — so uploading it once out of band is not by itself
+  enough: it must be uploaded (or renamed) under exactly `inferno_server.ssh_key`,
+  or `detect.yml`'s `inferno_ssh_key_id` lookup will find nothing and fail.
+  `timeweb` and `vdsina` both set `name` on upload; `inferno` is the outlier.
+  The real repair is adding `name` to that upload body, which is deliberately
+  out of scope here
+
+## Tags
+
+| Tag | Purpose |
+| :--- | :--- |
+| `inferno.detect` | Detect the os template, existing order, ssh key id and reinstall flag `config` needs |
+| `inferno.config` | Upload the ssh key and reinstall the server; also carried by `detect`'s task so a config-only run still has current facts |
+
+This role is invoked with a *dynamic* `include_role` (required, because it
+needs `delegate_to: localhost`). Ansible tag-filters a play's tasks when the
+iterator initialises, so if the calling `include_role` task is not itself
+tagged with the inner tag, `--tags inferno.config` filters out the
+`include_role` task itself and the role is never included at all — the inner
+tags never get evaluated. The caller must carry the role's tags on the
+`include_role` task itself, e.g.:
+
+```yaml
+- name: inferno vps
+  ansible.builtin.include_role:
+    name: flyoverhead.hosting.inferno
+    apply:
+      become: false
+      delegate_to: localhost
+  tags: [inferno, inferno.detect, inferno.config]
+```
+
+or use the flat `inferno` role tag instead.
 
 ## License
 

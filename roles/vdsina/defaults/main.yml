@@ -10,6 +10,10 @@ vdsina_server:
   group: Standard servers
   name: xray-nl
   password: '' # The password must contain from 8 to 32 latin characters or numbers
+  # NOTE: accepted here but currently unused -- `config | create server` in
+  # tasks/config.yml does not send `password` in the create-server body,
+  # so servers are provisioned key-only and setting this has no effect until
+  # that body includes it.
   ssh_key: id_ed25519
   template: Debian 12
   state: present

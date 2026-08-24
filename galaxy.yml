@@ -16,9 +16,7 @@ tags:
   - linux
   - provisioning
   - vps
-dependencies:
-  ansible.posix: '>=1.5.4'
-  community.general: '>=8.0.0'
+dependencies: {}
 
 repository: https://github.com/flyoverhead/hosting
 issues: https://github.com/flyoverhead/hosting/issues
