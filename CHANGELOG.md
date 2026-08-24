@@ -11,13 +11,15 @@ lived as loose local roles under `roles/`.
 ### Fixed
 
 - **inferno**: deleted the trailing `inferno | wait for vps` task in
-  `detect.yml`. It re-registered `vps_info`, destroying the looped result set
-  that `inferno_order_id` is derived from, and its URL ended in
-  `| map(attribute='orderid') | string`, which stringifies the map generator
-  itself — the request went to `…&orderid=<generator object sync_do_map at
-  0x…>`. The equivalent expression that sets `inferno_order_id` correctly ends
-  in `first`. The task was redundant anyway: the `vps | check` handler already
-  performs this wait properly, with `until:`.
+  `detect.yml`. Its URL ended in `| map(attribute='orderid') | string`, which
+  stringifies the map generator itself rather than extracting a value — the
+  request went to `…&orderid=<generator object sync_do_map at 0x…>` — where
+  the equivalent expression that sets `inferno_order_id` correctly ends in
+  `first`. It also re-registered `vps_info`, clobbering the looped result set
+  `inferno_order_id` is derived from, though harmlessly: every read of that
+  result happens at an earlier task position, before this task runs (and the
+  `vps | check` handler re-registers the same name for its own `until:` wait,
+  same harmless clobber). The task was redundant either way.
 - **inferno**: `inferno_ssh_key_id` was set from
   `inferno_ssh_keys_info.json.list | map(attribute='id') | first` — the first
   key in the account, ignoring the configured `inferno_server.ssh_key`
@@ -114,14 +116,21 @@ lived as loose local roles under `roles/`.
 
 ### Known issues
 
-- **inferno**: a first run against an account that does not already hold the
-  configured SSH key fails in `detect.yml`. `inferno_ssh_key_id` now selects
-  the account key matching `inferno_server.ssh_key` and errors if none
-  matches, while `config | add ssh keys` only uploads it afterwards. This is
-  deliberate — the previous behaviour silently took an arbitrary key and
-  provisioned the server with the wrong access. `timeweb` guards the
-  equivalent step with `timeweb_ssh_key_exists`; `inferno` has no counterpart
-  yet.
+- **inferno**: the role is unbootstrappable against an inferno.name account
+  that does not already hold the configured SSH key. `tasks/main.yml`
+  deliberately tags `detect` with both `inferno.detect` and `inferno.config`,
+  so any tag selection that reaches `config` runs `detect` first, and
+  `detect.yml`'s `inferno_ssh_key_id` now errors when `inferno_server.ssh_key`
+  matches no key in the account — before `config | add ssh keys` ever gets a
+  chance to upload it. There is no tag combination that reaches
+  `config | add ssh keys` on a fresh account: the key must already exist in
+  the inferno.name account before the role can succeed at all. This is a
+  deliberate consequence of no longer silently taking an arbitrary key and
+  provisioning the server with the wrong access, but it means bootstrapping a
+  new account is a manual, out-of-band step. `timeweb` guards the equivalent
+  step with `timeweb_ssh_key_exists`; `inferno` has no counterpart yet.
 - **inferno**: `config | add ssh keys` is unguarded and re-issues `sshkey.add`
   on every run. Its `changed_when` reads `json.message` and will raise on any
   response that omits that field, which is likely from the second run onward.
+  It also sends a JSON `body` with `method: GET`, which is unusual enough to
+  be worth confirming against the provider's API before relying on it.
