@@ -2,6 +2,20 @@
 
 All notable changes to `flyoverhead.hosting`.
 
+## 1.0.2
+
+### Changed
+
+- Collection README only. Status badges for the collection version,
+  ansible-core requirement, license and provider count, and section headings in
+  an order shared with `flyoverhead.docker` and `flyoverhead.server` so the
+  three read as one set. The provider table became its own Providers section,
+  the vault warning became a Credentials section rather than a trailing
+  paragraph, and Roles usage now cross-references Shared role shape instead of
+  repeating the `include_role` snippet. No role, task, template or default
+  changed; releasing it only so the README that ships in the Galaxy tarball
+  matches the repository.
+
 ## 1.0.1
 
 ### Fixed
