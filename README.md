@@ -1,5 +1,10 @@
 # `flyoverhead.hosting`
 
+[![Version](https://img.shields.io/badge/version-1.0.1-blue)](galaxy.yml)
+[![ansible-core](https://img.shields.io/badge/ansible--core-%E2%89%A52.16-black?logo=ansible&logoColor=white)](https://docs.ansible.com/ansible-core/devel/index.html)
+[![License](https://img.shields.io/badge/license-GPL--3.0--only-green)](https://www.gnu.org/licenses/gpl-3.0)
+[![Providers](https://img.shields.io/badge/providers-3-orange)](#-providers)
+
 Ansible roles that drive VPS hosting provider APIs: create, find and destroy
 servers at Timeweb Cloud, VDSina and inferno.name.
 
@@ -7,15 +12,7 @@ These roles talk to a provider's control-plane API. They do not configure the
 resulting machine — that is `flyoverhead.server` and `flyoverhead.docker`'s
 job, once the server exists and is reachable over SSH.
 
-## Included roles
-
-| Name | Provider | API docs |
-| :--- | :--- | :--- |
-| [`timeweb`](roles/timeweb/README.md) | Timeweb Cloud | <https://timeweb.cloud/api-docs> |
-| [`vdsina`](roles/vdsina/README.md) | VDSina | <https://userapi.vdsina.com> |
-| [`inferno`](roles/inferno/README.md) | inferno.name | n/a |
-
-## Installation and Usage
+## 🚀 Quick Start
 
 ### Requirements
 
@@ -41,7 +38,19 @@ ansible-galaxy collection install git+https://github.com/flyoverhead/hosting.git
 Full documentation and usage examples of role `<role>` can be found in
 `roles/<role>/README.md`.
 
-## Shared role shape
+These roles run against `localhost` and are invoked with `include_role` rather
+than `roles:` — see [Shared role shape](#-shared-role-shape) for the snippet and
+the reasoning behind it.
+
+## 🌐 Providers
+
+| Name | Provider | API docs |
+| :--- | :--- | :--- |
+| [`timeweb`](roles/timeweb/README.md) | Timeweb Cloud | <https://timeweb.cloud/api-docs> |
+| [`vdsina`](roles/vdsina/README.md) | VDSina | <https://userapi.vdsina.com> |
+| [`inferno`](roles/inferno/README.md) | inferno.name | n/a |
+
+## 🏗 Shared role shape
 
 All three roles take the same two variables: `<provider>_account` (the API
 endpoint plus credentials) and `<provider>_server` (the desired server —
@@ -70,7 +79,7 @@ the (possibly not-yet-existing, or about-to-be-destroyed) target host.
 `become: false` matters because the controller user usually cannot `sudo` to
 call out to an HTTPS API, and does not need to.
 
-## Testing
+## 🧪 Testing
 
 This collection has no test harness. `flyoverhead.server` and
 `flyoverhead.docker` ship a Vagrantfile because their roles configure a
@@ -78,12 +87,12 @@ throwaway VM; these roles create and destroy real, billed servers at a
 hosting provider, so there is nothing to stand up locally. Changes are
 verified with `ansible-lint` and review only.
 
-## Credentials
+## 🔐 Credentials
 
 Every `<provider>_account.api_key` (and `inferno_account.key`) is a live
 secret. It belongs in a vault-encrypted variable, never committed in
 cleartext group_vars or host_vars.
 
-## Licence
+## 📄 License
 
 GPL-3.0-only.
