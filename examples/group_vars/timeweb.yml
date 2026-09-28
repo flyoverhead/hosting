@@ -1,0 +1,14 @@
+---
+
+timeweb_account:
+  url: https://api.timeweb.cloud/api/v1
+  api_key: '{{ vault_timeweb_api_key }}'
+  location: ru-1
+
+timeweb_server:
+  cpu: 1
+  name: xray-ru
+  os_name: debian
+  os_version: '13'
+  ssh_key: id_ed25519
+  state: '{{ timeweb_server_state | default("present") }}'

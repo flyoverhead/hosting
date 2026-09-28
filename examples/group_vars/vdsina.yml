@@ -1,0 +1,9 @@
+---
+
+vdsina_server:
+  cpu: 1
+  group: Standard servers
+  name: '{{ vdsina_account.country }}'
+  ssh_key: '{{ ansible_ssh_key }}'
+  template: Debian 13
+  state: '{{ vdsina_server_state | default("present") }}'

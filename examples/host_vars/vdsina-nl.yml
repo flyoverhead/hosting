@@ -1,0 +1,8 @@
+---
+
+vdsina_account:
+  url: https://userapi.vdsina.com/v1
+  api_key: '{{ vault_vdsina_nl_api_key }}'
+  country: nl
+
+ansible_host: 192.0.2.20

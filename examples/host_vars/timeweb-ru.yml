@@ -1,0 +1,5 @@
+---
+
+ansible_host: 192.0.2.10
+
+# timeweb_server_state: absent
