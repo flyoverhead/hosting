@@ -1,0 +1,41 @@
+---
+
+- name: vdsina
+  hosts: vdsina
+  ignore_unreachable: true
+  gather_facts: true
+  tags:
+    - vdsina
+
+  tasks:
+
+    - name: vdsina vps
+      ansible.builtin.include_role:
+        name: flyoverhead.hosting.vdsina
+        apply:
+          become: false
+          delegate_to: localhost
+      tags:
+        - vdsina
+        - vdsina.detect
+        - vdsina.config
+
+- name: timeweb
+  hosts: timeweb
+  ignore_unreachable: true
+  gather_facts: true
+  tags:
+    - timeweb
+
+  tasks:
+
+    - name: timeweb vps
+      ansible.builtin.include_role:
+        name: flyoverhead.hosting.timeweb
+        apply:
+          become: false
+          delegate_to: localhost
+      tags:
+        - timeweb
+        - timeweb.detect
+        - timeweb.config

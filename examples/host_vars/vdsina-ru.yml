@@ -1,0 +1,10 @@
+---
+
+vdsina_account:
+  url: https://userapi.vdsina.ru/v1
+  api_key: '{{ vault_vdsina_ru_api_key }}'
+  country: ru
+
+ansible_host: 192.0.2.30
+
+# vdsina_server_state: absent

@@ -1,0 +1,11 @@
+---
+
+server_user:
+  name: deploy
+  group: deploy
+  home: /home/deploy
+  password: '{{ vault_server_user_password }}'
+  authorized_ssh_keys:
+    - id_ed25519
+
+ansible_ssh_key: '{{ server_user.authorized_ssh_keys | first }}'

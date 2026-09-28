@@ -1,0 +1,6 @@
+---
+
+vault_server_user_password: CHANGE_ME
+vault_timeweb_api_key: CHANGE_ME
+vault_vdsina_nl_api_key: CHANGE_ME
+vault_vdsina_ru_api_key: CHANGE_ME
