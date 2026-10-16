@@ -86,13 +86,12 @@
             ansible_host: >-
               {{ vdsina_server_create_info.json.data.ip.ip }}
 
-- name: config | save ansible_host fact
-  ansible.builtin.lineinfile:
-    path: '{{ inventory_dir }}/host_vars/{{ inventory_hostname }}.yml'
-    regexp: '^ansible_host:'
-    line: 'ansible_host: {{ ansible_host }}'
-  when:
-    - vdsina_server.state | default('present') == 'present'
+        - name: config | report ansible_host of the created server
+          ansible.builtin.debug:
+            msg: >-
+              Created {{ vdsina_server.name }} with public IPv4 {{ ansible_host }}.
+              Set ansible_host: {{ ansible_host }} in the host_vars of
+              {{ inventory_hostname }}; this role does not write inventory files.
 
 - name: config | delete server
   ansible.builtin.uri:

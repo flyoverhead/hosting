@@ -82,15 +82,14 @@ costs one call per read. It changes nothing on the provider side.
 Nothing that changes the account runs, and a check run is correspondingly quiet
 about it: creating the ssh key and ordering a server are skipped as whole
 blocks, because each reads its result back out of the creation response, and
-deleting a server (`state: absent`) is skipped as well. What a check run does
-report is the `ansible_host` line it would write into `host_vars`.
+deleting a server (`state: absent`) is skipped as well.
 
 ## Tags
 
 | Tag | Purpose |
 | :--- | :--- |
 | `timeweb.detect` | Detect the preset, existing server, ssh key and os image ids `config` needs |
-| `timeweb.config` | Create/update the server and ssh key, save `ansible_host`; also carried by `detect`'s task so a config-only run still has current facts |
+| `timeweb.config` | Create/update the server and ssh key, print a new server's `ansible_host`; also carried by `detect`'s task so a config-only run still has current facts |
 
 This role is invoked with a *dynamic* `include_role` (required, because it
 needs `delegate_to: localhost`). Ansible tag-filters a play's tasks when the

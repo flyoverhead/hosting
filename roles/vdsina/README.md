@@ -88,15 +88,14 @@ Nothing that changes the account runs, and a check run is correspondingly quiet
 about it: creating the ssh key, ordering a server and dropping its backup
 schedule are skipped as whole blocks, because each reads its result back out of
 the creation response, and deleting a server (`state: absent`) is skipped as
-well. What a check run does report is the `ansible_host` line it would write
-into `host_vars`.
+well.
 
 ## Tags
 
 | Tag | Purpose |
 | :--- | :--- |
 | `vdsina.detect` | Detect the datacenter, existing server, group/plan, ssh key and template ids `config` needs |
-| `vdsina.config` | Create/update the server and ssh key, save `ansible_host`; also carried by `detect`'s task so a config-only run still has current facts |
+| `vdsina.config` | Create/update the server and ssh key, print a new server's `ansible_host`; also carried by `detect`'s task so a config-only run still has current facts |
 
 This role is invoked with a *dynamic* `include_role` (required, because it
 needs `delegate_to: localhost`). Ansible tag-filters a play's tasks when the
