@@ -2,6 +2,23 @@
 
 All notable changes to `flyoverhead.hosting`.
 
+## 1.0.3
+
+### Fixed
+
+- **timeweb**, **vdsina**: `config | save ansible_host fact` is gone. It ran
+  on every pass with `state: present`, not only after ordering a server, and
+  wrote `ansible_host` into `{{ inventory_dir }}/host_vars/<host>.yml` with
+  `lineinfile`. An inventory whose host_vars are SOPS-encrypted
+  (`<host>.sops.yml`) has no such file, so every run of the role failed there,
+  check mode included. Pointed at the encrypted file it would have written a
+  cleartext line into it.
+- The created server's public IPv4 is now printed by
+  `config | report ansible_host of the created server`, inside the create
+  block, so it runs only when a server was just ordered. Recording it in the
+  inventory is left to the operator. This also resolves the 1.0.0 known issue
+  that the task failed when the host_vars file did not exist yet.
+
 ## 1.0.2
 
 ### Changed
