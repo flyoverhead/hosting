@@ -2,6 +2,17 @@
 
 All notable changes to `flyoverhead.hosting`.
 
+## 1.0.4
+
+### Fixed
+
+- **vdsina**: an existing server no longer fails `detect` when its plan is no
+  longer sold. The role looked up a plan matching `vdsina_server.cpu` on every
+  run, though only ordering a new server uses it, and failed with "No first
+  item, sequence was empty" once Vdsina stopped listing that plan. The lookup
+  now runs only when the server does not exist, and a missing plan fails with
+  the list of plans the group still offers.
+
 ## 1.0.3
 
 ### Fixed

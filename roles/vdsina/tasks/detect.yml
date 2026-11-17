@@ -79,6 +79,7 @@
 - name: detect | server plans
   when:
     - vdsina_server.state | default('present') == 'present'
+    - not vdsina_server_exists
   block:
 
     - name: detect | get server plans
@@ -97,7 +98,17 @@
         vdsina_server_plan_id: >-
           {{ vdsina_server_plans_info.json.data |
           selectattr('data.cpu.value', 'equalto', vdsina_server.cpu) |
-          map(attribute='id') | first }}
+          map(attribute='id') | first | default(none) }}
+
+    - name: detect | assert server plan found
+      ansible.builtin.assert:
+        that:
+          - vdsina_server_plan_id is not none
+        fail_msg: >-
+          No plan with {{ vdsina_server.cpu }} CPU in server group
+          '{{ vdsina_server.group }}'. Available:
+          {{ vdsina_server_plans_info.json.data | map(attribute='name') | join(', ') }}
+        quiet: true
 
 - name: detect | ssh keys
   when:
